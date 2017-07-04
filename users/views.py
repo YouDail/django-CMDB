@@ -4,6 +4,16 @@ from .models import User
 import hashlib
 from django.http import JsonResponse
 
+'''
+登陆用户名验证
+'''
+def loginValid(func):
+    def inner(request, *args, **kwargs):
+        name = request.COOKIES.get("name")  #获取cookie
+        if not name:
+            return HttpResponseRedirect("/users/login")
+        return func(request, *args, **kwargs)
+    return inner
 
 def repeat_user(username):
     '''
@@ -47,10 +57,11 @@ def register(request):
         u.phone = request.POST["Phone"]
         #保存到数据库
         u.save()
-        return HttpResponseRedirect("/users/login")
+        return render(request, "login.html", locals())
     return render(request, 'register.html', locals())
 
 def login(request):
+    global referer
     if request.method == "POST" and request.POST:
         name = request.POST["Username"]
         passWd = request.POST["Password"]
@@ -60,26 +71,25 @@ def login(request):
         if (repeat_user(name)["status"] == "success"):
             dbPassWord = User.objects.get(username = name).password
             if passWd == dbPassWord:
-                response = HttpResponseRedirect("index")
+                response = HttpResponseRedirect("/users/index")
                 response.set_cookie('name', name, max_age= 3600)
-                request.session["name"] = name
+                request.session["name"] =    name
                 return response
             else:
-                return HttpResponseRedirect("login")
+                password_warnning = "Wrong password!"
+                return render(request, "login.html", locals())
         else:
+            username_warnning = "Username not exist."
             return  render(request, "login.html", locals())
-
+    print(request.META.get('HTTP_REFERER'))
     return render(request, 'login.html', locals())
 
-def loginValid(func):
-    def inner(request, *args, **kwargs):
-        name = request.COOKIES.get("name")  #获取cookie
-        if not name:
-            return HttpResponseRedirect("login")
-        return func(request, *args, **kwargs)
-    return inner
 
 @loginValid
 def index(request):
     user_name = request.COOKIES.get("name","")
     return render(request, 'index.html', locals())
+
+@loginValid
+def userlist(req):
+    return render(req, 'tables.html', locals())

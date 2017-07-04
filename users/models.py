@@ -30,3 +30,21 @@ class UserPermission(BaseModel):
 class PermissionGroup(BaseModel):
     permission_id = models.IntegerField(verbose_name="权限ID")
     group_id = models.IntegerField(verbose_name="组ID")
+
+
+class Server(BaseModel):
+    hostname = models.CharField(max_length=32, verbose_name="主机名")
+    ip = models.CharField(max_length=32, verbose_name="ip")
+    mac = models.CharField(max_length=32, verbose_name="物理地址")
+    cpu = models.CharField(max_length=32, verbose_name="cpu")
+    mem = models.CharField(max_length=32, verbose_name="内存")
+    disk = models.CharField(max_length=32, verbose_name="磁盘")
+    system = models.CharField(max_length=32, verbose_name="系统")
+    io = models.CharField(max_length=32, verbose_name="IO")
+    last_login_time = models.DateTimeField(verbose_name="上次登录时间")
+    last_login_user = models.IntegerField(verbose_name="上次登录用户")
+    is_active = models.CharField(max_length=32, verbose_name="是否被激活")
+
+class UserServer(BaseModel):
+    usr_id = models.IntegerField()
+    ser_id = models.IntegerField()
